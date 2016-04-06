@@ -22,6 +22,7 @@ public class MovieDownloader {
 
 		//construct the url for the omdbapi API
 		String urlString = "";
+		//updates urlString but if there is an unsupported encoding exception, it throws a null
 		try {
 			urlString = "http://www.omdbapi.com/?s=" + URLEncoder.encode(movie, "UTF-8") + "&type=movie";
 		}catch(UnsupportedEncodingException uee){
@@ -35,12 +36,16 @@ public class MovieDownloader {
 
 		try {
 
+			//creates a URL object using urlString
 			URL url = new URL(urlString);
 
+			//gets the information from the database that is specific to the URL
 			urlConnection = (HttpURLConnection) url.openConnection();
 			urlConnection.setRequestMethod("GET");
 			urlConnection.connect();
 
+			//gets the input stream from the url and initializes the object
+			//that can read the input stream
 			InputStream inputStream = urlConnection.getInputStream();
 			StringBuffer buffer = new StringBuffer();
 			if (inputStream == null) {
@@ -48,12 +53,14 @@ public class MovieDownloader {
 			}
 			reader = new BufferedReader(new InputStreamReader(inputStream));
 
+			//appends the lines to the buffer object 
 			String line = reader.readLine();
 			while (line != null) {
 				buffer.append(line + "\n");
 				line = reader.readLine();
 			}
 
+			//prints the results in JSON format 
 			if (buffer.length() == 0) {
 				return null;
 			}
@@ -64,9 +71,12 @@ public class MovieDownloader {
 
 			movies = results.split("\n");
 		} 
+		//if there is an IOException, it will return null
 		catch (IOException e) {
 			return null;
 		} 
+		//at the very end regardless of try and catch, it will disonnect the connection 
+		//if there is one and the reader will close
 		finally {
 			if (urlConnection != null) {
 				urlConnection.disconnect();
@@ -80,6 +90,7 @@ public class MovieDownloader {
 			}
 		}
 
+		//returns string
 		return movies;
 	}
 
